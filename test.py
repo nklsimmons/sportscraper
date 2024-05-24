@@ -43,10 +43,12 @@ Under 9, under 8 = 2 clev under picks at 8.5
 """
 
 def get():
-    url = "https://contests.covers.com/kingofcovers/cdd9afbe-a974-418f-a86f-b13f013c3e1d"
+    # https://contests.covers.com/kingofcovers/cdd9afbe-a974-418f-a86f-b13f013c3e1d
+    base_url = "https://contests.covers.com"
+    url = "/kingofcovers/cdd9afbe-a974-418f-a86f-b13f013c3e1d"
 
-    with urlopen(url) as page:
-        html_bytes = page.read()
+    with urlopen(base_url + url) as main_page:
+        html_bytes = main_page.read()
 
     html = html_bytes.decode("utf-8")
     soup = BeautifulSoup(html, "html.parser")
@@ -71,25 +73,71 @@ def get():
 
     """
 
+    data = []
+
     for row in rows:
+
         tds = row.find_all("td")
 
-        row_data = [td.text.strip() for td in tds]
+        status = tds[6].text.strip()
+        if status != "Pending":
+            continue
 
-        new_row = {
-            "Rank": row_data[0],
-            "Member": row_data[1],
-            "W-L-T": row_data[2],
-            "%": row_data[3],
-            "Units": row_data[4],
-            "Status": row_data[6],
-        }
+        profile_name = tds[1].text.strip()
+        profile_link = tds[5].find('a')['href']
 
-        data.append(new_row)
+        with urlopen(base_url + profile_link) as profile_page:
+            profile_html_bytes = profile_page.read()
 
-    return data
+        profile_html = profile_html_bytes.decode("utf-8")
 
-    # return 'Hello'
+        profile_soup = BeautifulSoup(profile_html, "html.parser")
+
+        picks_table = profile_soup.find_all("table", class_="cmg_contests_pendingpicks")[-1]
+
+        date_today = picks_table.find_previous_sibling("h3").text
+
+        picks_trs = picks_table.find_all("tr")
+
+        for pick_tr in picks_trs:
+
+            picks_tds = pick_tr.find_all("td")
+
+            data.append({
+                "profile": profile_name,
+                "date": date_today,
+                "game": ' - '.join(clean_text(picks_tds[0].text)),
+                "time": ''.join(clean_text(picks_tds[2].text)),
+                "pick": parse_picks(clean_text(picks_tds[3].text)),
+                # "units": clean_text(picks_tds[4].text),
+            })
+            continue
+
+        return data
 
 
-# get()
+def clean_text(text):
+    text_arr = text.strip().split("\n")
+    cleaned_text_arr = [t.strip() for t in text_arr]
+    return list(filter(lambda t: t, cleaned_text_arr))
+
+
+def parse_picks(picks):
+    over_under = None
+    over_under_value = None
+    side = None
+    side_value = None
+
+    for pick in picks:
+        p_arr = pick.split()
+        if p_arr[0] == 'Over' or p_arr[0] == 'Under':
+            over_under = p_arr[0]
+            over_under_value = p_arr[1]
+        else:
+            side = p_arr[0]
+            side_value = p_arr[1]
+
+    return {
+        "O/U": (over_under, over_under_value) if over_under else None,
+        "Side": (side, side_value) if side else None
+    }
