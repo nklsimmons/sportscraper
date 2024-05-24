@@ -6,8 +6,7 @@ from pymongo import MongoClient
 from test import get
 
 app = Flask(__name__)
-
-client = MongoClient("mongo:27017")
+client = MongoClient("mongodb://sportscraper3-mongodb-1")
 
 
 @app.route("/")
