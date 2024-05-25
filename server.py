@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 from dotenv import load_dotenv
+from functions import dump, filter_duplicates, date_string_to_date
 import os
-import json
 
 from flask import Flask, render_template
 from pymongo import MongoClient
+from datetime import datetime
 
 from app import scrape_data
 
@@ -16,18 +17,35 @@ MONGODB_CONTAINER = os.getenv('MONGODB_CONTAINER')
 app = Flask(__name__)
 client = MongoClient(f"mongodb://{MONGODB_CONTAINER}")
 
-
-def dump(v):
-    return json.loads(json.dumps(v))
-
 @app.route("/")
 def index():
-    data_by_date = {}
+    entries = client["MLB"]["covers"].find({}, {"date": 1})
+
+    unique_dates = filter_duplicates([e["date"] for e in entries])
+
+    dates_list = []
+
+    for date in unique_dates:
+        dates_list.append({
+            "name": date,
+            "date": str(date_string_to_date(date))
+        })
+
+    dates_list.sort(reverse=True, key=lambda d : d["date"])
+
+    return render_template('index.html', latest=dates_list[0], dates=dates_list[1:])
+
+
+@app.route("/picks/<date>")
+def showDate(date):
+
+    picks_datetime = datetime.strptime(date, "%Y-%m-%d")
+    date_str = picks_datetime.strftime("%A, %B %-d")
+
     games = set()
 
     # Get all relevant dates
-    todays_date = "Saturday, May 25"
-    todays = client["MLB"]["covers"].find({"date": todays_date})
+    todays = client["MLB"]["covers"].find({"date": date_str})
     for t in todays:
         games.add(t["game"])
 
@@ -41,7 +59,7 @@ def index():
         todays_games = client["MLB"]["covers"].find(
             {
                 "game": game,
-                "date": todays_date
+                "date": date_str
             }, {"_id": 0})
 
         over_under_count = []
@@ -76,7 +94,6 @@ def index():
 
         if len(sides_count_list) == 1:
             sides_count_list.append([None, None])
-            # return dump(sides_count_list)
 
         game_data[game]["summary"] = {
             "over_under_count": over_under_count,
@@ -84,9 +101,7 @@ def index():
             "sides_count": sides_count_list
         }
 
-    # return dump(game_data)
-
-    return render_template('index.html', data=game_data, date=todays_date)
+    return render_template('show.html', data=game_data, date=date_str)
 
 
 @app.route("/run")
@@ -102,6 +117,10 @@ def run():
 
         if not existing:
             client["MLB"]["covers"].insert_one(data)
+
+    client["MLB"]["update_record"].insert_one({
+        "datetime": str(datetime.now())
+    })
 
     return "Success"
 

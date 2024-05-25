@@ -2,11 +2,13 @@ import os
 
 from dotenv import load_dotenv
 from pymongo import MongoClient
+from datetime import datetime
 
 from app import scrape_data
 
 from pprint import pprint
 
+# docker exec sportscraper3-backend-1 python fetch_data.py
 
 load_dotenv()
 
@@ -29,5 +31,9 @@ for data in dataset:
     if not existing:
         client["MLB"]["covers"].insert_one(data)
         n_added += 1
+
+client["MLB"]["update_record"].insert_one({
+    "datetime": str(datetime.now())
+})
 
 print(f"{len(dataset)} records fetched, {n_added} inserted")
