@@ -29,13 +29,35 @@
                 <div>
                     <p>
                         <b>Sides:</b>
-                        <span>
-                            {{ game["summary"]["sides_count"][0][0] }}: {{ game["summary"]["sides_count"][0][1] }}
-                        </span>
-                        {% if game["summary"]["sides_count"][1][0] %}
-                        <span>
-                            {{ game["summary"]["sides_count"][1][0] }}: {{ game["summary"]["sides_count"][1][1] }}
-                        </span>
+
+                        {% set game1 = game["summary"]["sides_count"][0] %}
+                        {% set game2 = game["summary"]["sides_count"][1] %}
+
+                        {% if game1[1] > game2[1] %}
+                            <span class="bg-success text-white">
+                                {{ game1[0] }}: {{ game1[1] }}
+                            </span>
+
+                            {% if game2[0] %}
+                                <span>
+                                    {{ game2[0] }}: {{ game2[1] }}
+                                </span>
+                            {% endif %}
+
+                        {% elif game1[1] < game2[1] %}
+                            <span>
+                                {{ game1[0] }}: {{ game1[1] }}
+                            </span>
+                            <span class="bg-success text-white">
+                                {{ game2[0] }}: {{ game2[1] }}
+                            </span>
+                        {% else %}
+                            <span class="bg-warning">
+                                {{ game1[0] }}: {{ game1[1] }}
+                            </span>
+                            <span class="bg-warning">
+                                {{ game2[0] }}: {{ game2[1] }}
+                            </span>
                         {% endif %}
                     </p>
                 </div>

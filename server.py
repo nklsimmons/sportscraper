@@ -105,7 +105,7 @@ def showDate(date):
         sides_count_list = [[side, sides_count[side]] for side in sides_count]
 
         if len(sides_count_list) == 1:
-            sides_count_list.append([None, None])
+            sides_count_list.append([0, 0])
 
         game_data[game]["summary"] = {
             "over_under_count": over_under_count,
