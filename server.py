@@ -77,6 +77,7 @@ def showDate(date):
         sides_count = dict()
 
         for tg in days_games:
+            game_time = tg["time"]
 
             if tg["pick"].get("O/U"):
 
@@ -109,15 +110,29 @@ def showDate(date):
         game_data[game]["summary"] = {
             "over_under_count": over_under_count,
             "over_under_avg": over_under_avg,
-            "sides_count": sides_count_list
+            "sides_count": sides_count_list,
+            "time": game_time
         }
+
+    # I am too fucking tired to do a proper refactor so this will have to do for now
+    game_data_list = []
+    for game in game_data:
+        game_data_list.append({
+            "name": game,
+            "time": game_data[game]["games"][0]["time"],
+            "picks": game_data[game]["games"],
+            "summary": game_data[game]["summary"],
+        })
+    game_data_list.sort(key=lambda g : g["time"])
 
     now = datetime.now()
     time_since_last_update = now - get_last_update()
     mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
 
+    # return dump(game_data_list)
+
     return render_template('show.html',
-                           data=game_data,
+                           data=game_data_list,
                            date=date_str,
                            mins_since_last_update=mins_since_last_update)
 
