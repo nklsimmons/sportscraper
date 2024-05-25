@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from dotenv import load_dotenv
 import os
 
 from pprint import pprint
@@ -6,12 +7,18 @@ from flask import Flask
 from pymongo import MongoClient
 from test import get
 
+
+load_dotenv()
+
+MONGODB_CONTAINER = os.getenv('MONGODB_CONTAINER')
+
 app = Flask(__name__)
-client = MongoClient("mongodb://sportscraper3-mongodb-1")
+client = MongoClient(f"mongodb://{MONGODB_CONTAINER}")
 
 
 @app.route("/")
 def index():
+
     data = []
 
     for item in client["MLB"]["covers"].find():
