@@ -26,15 +26,16 @@ services:
 
   mongodb:
     image: mongo:6-jammy
+    container_name: mongodb
     ports:
-      - '27017:27017'
+      - '27117:27017'
     volumes:
       - dbdata6:/data/db
-
-    # restart: always
-    # environment:
-    #   MONGO_INITDB_ROOT_USERNAME: root
-    #   MONGO_INITDB_ROOT_PASSWORD: root
+      - ./mongodb/mongod.conf:/etc/mongod.conf
+    entrypoint: ["mongod", "--auth", "--config", "/etc/mongod.conf"]
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
 
 volumes:
   dbdata6:

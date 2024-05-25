@@ -13,12 +13,14 @@ from pprint import pprint
 load_dotenv()
 
 MONGODB_CONTAINER = os.getenv('MONGODB_CONTAINER')
+MONGODB_USER = os.getenv('MONGODB_USER')
+MONGODB_PASSWORD = os.getenv('MONGODB_PASSWORD')
 
 dataset = scrape_data()
 
 n_added = 0
 
-client = MongoClient(f"mongodb://{MONGODB_CONTAINER}")
+client = MongoClient(f"mongodb://{MONGODB_USER}:{MONGODB_PASSWORD}@{MONGODB_CONTAINER}")
 
 for data in dataset:
 

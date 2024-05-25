@@ -13,9 +13,11 @@ from app import scrape_data
 load_dotenv()
 
 MONGODB_CONTAINER = os.getenv('MONGODB_CONTAINER')
+MONGODB_USER = os.getenv('MONGODB_USER')
+MONGODB_PASSWORD = os.getenv('MONGODB_PASSWORD')
 
 app = Flask(__name__)
-client = MongoClient(f"mongodb://{MONGODB_CONTAINER}")
+client = MongoClient(f"mongodb://{MONGODB_USER}:{MONGODB_PASSWORD}@{MONGODB_CONTAINER}")
 
 def get_last_update():
     last_update_string = client["MLB"]["update_record"].find({}, {"datetime": 1}).sort({"datetime": -1})[0]["datetime"]
