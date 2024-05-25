@@ -42,6 +42,7 @@ Under 9, under 8 = 2 clev under picks at 8.5
 
 """
 
+
 def get():
     # https://contests.covers.com/kingofcovers/cdd9afbe-a974-418f-a86f-b13f013c3e1d
     base_url = "https://contests.covers.com"
@@ -111,9 +112,8 @@ def get():
                 "pick": parse_picks(clean_text(picks_tds[3].text)),
                 # "units": clean_text(picks_tds[4].text),
             })
-            continue
 
-        return data
+    return data
 
 
 def clean_text(text):

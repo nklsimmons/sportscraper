@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os
 
+from pprint import pprint
 from flask import Flask
 from pymongo import MongoClient
 from test import get
@@ -11,18 +12,29 @@ client = MongoClient("mongodb://sportscraper3-mongodb-1")
 
 @app.route("/")
 def index():
-    # try:
-    #     client.admin.command('ismaster')
-    # except:
-    #     return "Server not available"
+    data = []
 
-    # return 'potato'
-    # return 'hello'
-    return get()
+    for item in client["MLB"]["covers"].find():
+        data.append(item)
+
+    return str(data)
+
 
 @app.route("/run")
 def run():
-    return get()
+    dataset = get()
+
+    for data in dataset:
+        existing = client["MLB"]["covers"].find_one({
+            "profile": data["profile"],
+            "date": data["date"],
+            "game": data["game"],
+        })
+
+        if not existing:
+            client["MLB"]["covers"].insert_one(data)
+
+    return "Success"
 
 
 # @app.route('/')
