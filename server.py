@@ -6,7 +6,7 @@ import json
 from flask import Flask, render_template
 from pymongo import MongoClient
 
-from app import get
+from app import scrape_data
 
 
 load_dotenv()
@@ -91,7 +91,7 @@ def index():
 
 @app.route("/run")
 def run():
-    dataset = get()
+    dataset = scrape_data()
 
     for data in dataset:
         existing = client["MLB"]["covers"].find_one({

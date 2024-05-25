@@ -43,7 +43,7 @@ Under 9, under 8 = 2 clev under picks at 8.5
 """
 
 
-def get():
+def scrape_data():
     # https://contests.covers.com/kingofcovers/cdd9afbe-a974-418f-a86f-b13f013c3e1d
     base_url = "https://contests.covers.com"
     url = "/kingofcovers/cdd9afbe-a974-418f-a86f-b13f013c3e1d"
