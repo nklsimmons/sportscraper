@@ -56,9 +56,8 @@ def showDate(date):
 
     games = set()
 
-    # Get all relevant dates
-    todays = client["MLB"]["covers"].find({"date": date_str})
-    for t in todays:
+    days = client["MLB"]["covers"].find({"date": date_str})
+    for t in days:
         games.add(t["game"])
 
     game_data = dict()
@@ -68,7 +67,7 @@ def showDate(date):
         except KeyError:
             game_data[game] = {"games": [], "summary": dict()}
 
-        todays_games = client["MLB"]["covers"].find(
+        days_games = client["MLB"]["covers"].find(
             {
                 "game": game,
                 "date": date_str
@@ -77,7 +76,7 @@ def showDate(date):
         over_under_count = []
         sides_count = dict()
 
-        for tg in todays_games:
+        for tg in days_games:
 
             if tg["pick"].get("O/U"):
 
