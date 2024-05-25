@@ -17,6 +17,12 @@ MONGODB_CONTAINER = os.getenv('MONGODB_CONTAINER')
 app = Flask(__name__)
 client = MongoClient(f"mongodb://{MONGODB_CONTAINER}")
 
+def get_last_update():
+    last_update_string = client["MLB"]["update_record"].find({}, {"datetime": 1}).sort({"datetime": -1})[0]["datetime"]
+    last_update = datetime.strptime(last_update_string, "%Y-%m-%d %H:%M:%S.%f")
+    return last_update
+
+
 @app.route("/")
 def index():
     entries = client["MLB"]["covers"].find({}, {"date": 1})
@@ -33,12 +39,18 @@ def index():
 
     dates_list.sort(reverse=True, key=lambda d : d["date"])
 
-    return render_template('index.html', latest=dates_list[0], dates=dates_list[1:])
+    now = datetime.now()
+    time_since_last_update = now - get_last_update()
+    mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
+
+    return render_template('index.html',
+                           latest=dates_list[0],
+                           dates=dates_list[1:],
+                           mins_since_last_update=mins_since_last_update)
 
 
 @app.route("/picks/<date>")
 def showDate(date):
-
     picks_datetime = datetime.strptime(date, "%Y-%m-%d")
     date_str = picks_datetime.strftime("%A, %B %-d")
 
@@ -101,7 +113,14 @@ def showDate(date):
             "sides_count": sides_count_list
         }
 
-    return render_template('show.html', data=game_data, date=date_str)
+    now = datetime.now()
+    time_since_last_update = now - get_last_update()
+    mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
+
+    return render_template('show.html',
+                           data=game_data,
+                           date=date_str,
+                           mins_since_last_update=mins_since_last_update)
 
 
 @app.route("/run")

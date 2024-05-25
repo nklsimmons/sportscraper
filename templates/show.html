@@ -10,6 +10,10 @@
     <div class="container">
         <h1>{{ date }}</h1>
 
+        <p>Last updated {{ mins_since_last_update }} minutes ago</p>
+
+        <hr>
+
         {% for game in data %}
             <div>
                 <h2>{{ game }}</h2>
