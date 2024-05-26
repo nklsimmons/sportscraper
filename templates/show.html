@@ -18,89 +18,106 @@
             <div>
                 <h2>{{ game["name"] }} ({{ game["summary"]["time"] }})</h2>
 
-                <h3>Summary</h3>
+                <div class="row">
 
-                <div>
-                    <p>
-                        <b>Sides:</b>
+                <div class="col">
+                    <div class="card">
 
-                        {% set game1 = game["summary"]["sides_count"][0] %}
-                        {% set game2 = game["summary"]["sides_count"][1] %}
+                        <div class="card-body">
 
-                        {% if game1[1] > game2[1] %}
-                            <span class="bg-success text-white">
-                                {{ game1[0] }}: {{ game1[1] }}
-                            </span>
-
-                            {% if game2[0] %}
-                                <span>
-                                    {{ game2[0] }}: {{ game2[1] }}
-                                </span>
-                            {% endif %}
-
-                        {% elif game1[1] < game2[1] %}
-                            <span>
-                                {{ game1[0] }}: {{ game1[1] }}
-                            </span>
-                            <span class="bg-success text-white">
-                                {{ game2[0] }}: {{ game2[1] }}
-                            </span>
-                        {% else %}
-                            <span class="bg-warning">
-                                {{ game1[0] }}: {{ game1[1] }}
-                            </span>
-                            <span class="bg-warning">
-                                {{ game2[0] }}: {{ game2[1] }}
-                            </span>
-                        {% endif %}
-                    </p>
-                </div>
-
-                <div>
-                    <p>
-                        <b>Over/Under:</b>
-                        {% for ou in game["summary"]["over_under_count"] %}
-                            <div>
-                                {% if '-' in ou %}Under {% else %}Over {% endif %}{{ ou|float|abs }}: {{ game["summary"]["over_under_count"][ou] }}
+                            <div class="card-title">
+                                <h3>Summary</h3>
                             </div>
-                        {% endfor %}
-                    </p>
-                    <p>
-                        Average: {{ game["summary"]["over_under_avg"]|round(2) }}
-                    </p>
+
+                            <p>
+                                <b>Sides:</b>
+
+                                {% set game1 = game["summary"]["sides_count"][0] %}
+                                {% set game2 = game["summary"]["sides_count"][1] %}
+
+                                {% if game1[1] > game2[1] %}
+                                    <span class="bg-success text-white">
+                                        {{ game1[0] }}: {{ game1[1] }}
+                                    </span>
+
+                                    {% if game2[0] %}
+                                        <span>
+                                            {{ game2[0] }}: {{ game2[1] }}
+                                        </span>
+                                    {% endif %}
+
+                                {% elif game1[1] < game2[1] %}
+                                    <span>
+                                        {{ game1[0] }}: {{ game1[1] }}
+                                    </span>
+                                    <span class="bg-success text-white">
+                                        {{ game2[0] }}: {{ game2[1] }}
+                                    </span>
+                                {% else %}
+                                    <span class="bg-warning">
+                                        {{ game1[0] }}: {{ game1[1] }}
+                                    </span>
+                                    <span class="bg-warning">
+                                        {{ game2[0] }}: {{ game2[1] }}
+                                    </span>
+                                {% endif %}
+                            </p>
+                            <p>
+                                <b>Over/Under:</b>
+                                {% for ou in game["summary"]["over_under_count"] %}
+                                    <div>
+                                        {% if '-' in ou %}Under {% else %}Over {% endif %}{{ ou|float|abs }}: {{ game["summary"]["over_under_count"][ou] }}
+                                    </div>
+                                {% endfor %}
+                                <b>Average O/U:</b> {{ game["summary"]["over_under_avg"]|round(2) }}
+                            </p>
+                        </div>
+                    </div>
+
                 </div>
 
-                <h3>Picks</h3>
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body">
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Profile</th>
-                            <th>O/U</th>
-                            <th>Side</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for pick in game["picks"] %}
-                            <tr>
-                                <td>{{ pick["profile"] }}</td>
+                            <div class="card-title">
+                                <h3>Picks</h3>
+                            </div>
 
-                                {% if pick["pick"].get("O/U") %}
-                                    <td>{{ ' '.join(pick["pick"]["O/U"]) }}</td>
-                                {% else %}
-                                    <td>n/a</td>
-                                {% endif %}
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Profile</th>
+                                        <th>O/U</th>
+                                        <th>Side</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for pick in game["picks"] %}
+                                        <tr>
+                                            <td>{{ pick["profile"] }}</td>
 
-                                {% if pick["pick"].get("Side") %}
-                                    <td>{{ ' '.join(pick["pick"]["Side"]) }}</td>
-                                {% else %}
-                                    <td>n/a</td>
-                                {% endif %}
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                            {% if pick["pick"].get("O/U") %}
+                                                <td>{{ ' '.join(pick["pick"]["O/U"]) }}</td>
+                                            {% else %}
+                                                <td>n/a</td>
+                                            {% endif %}
 
+                                            {% if pick["pick"].get("Side") %}
+                                                <td>{{ ' '.join(pick["pick"]["Side"]) }}</td>
+                                            {% else %}
+                                                <td>n/a</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                </div>
             </div>
 
             <hr>
