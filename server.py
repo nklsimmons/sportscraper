@@ -75,7 +75,7 @@ def showDate(date):
                 "date": date_str
             }, {"_id": 0})
 
-        over_under_count = []
+        over_under_count = dict()
         sides_count = dict()
 
         for tg in days_games:
@@ -87,7 +87,10 @@ def showDate(date):
                 if tg["pick"].get("O/U")[0] == "Under":
                     over_under_value = over_under_value * -1
 
-                over_under_count.append(over_under_value)
+                try:
+                    over_under_count[str(over_under_value)] += 1
+                except KeyError:
+                    over_under_count[str(over_under_value)] = 1
 
             if tg["pick"].get("Side"):
                 side = tg["pick"].get("Side")[0]
@@ -100,7 +103,9 @@ def showDate(date):
             game_data[game]["games"].append(tg)
 
         if over_under_count:
-            over_under_avg = round(sum(over_under_count) / len(over_under_count), 2)
+            ou_count = sum(over_under_count[n] for n in over_under_count)
+            ou_sum = sum(over_under_count[n] * float(n) for n in over_under_count)
+            over_under_avg = ou_sum / ou_count
         else:
             over_under_avg = 0
 
@@ -130,8 +135,6 @@ def showDate(date):
     now = datetime.now()
     time_since_last_update = now - get_last_update()
     mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
-
-    # return dump(game_data_list)
 
     return render_template('show.html',
                            data=game_data_list,

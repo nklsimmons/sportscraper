@@ -22,12 +22,6 @@
 
                 <div>
                     <p>
-                        <b>Average Over/Under:</b> {{ game["summary"]["over_under_avg"] }}
-                    </p>
-                </div>
-
-                <div>
-                    <p>
                         <b>Sides:</b>
 
                         {% set game1 = game["summary"]["sides_count"][0] %}
@@ -59,6 +53,20 @@
                                 {{ game2[0] }}: {{ game2[1] }}
                             </span>
                         {% endif %}
+                    </p>
+                </div>
+
+                <div>
+                    <p>
+                        <b>Over/Under:</b>
+                        {% for ou in game["summary"]["over_under_count"] %}
+                            <div>
+                                {% if '-' in ou %}Under {% else %}Over {% endif %}{{ ou|float|abs }}: {{ game["summary"]["over_under_count"][ou] }}
+                            </div>
+                        {% endfor %}
+                    </p>
+                    <p>
+                        Average: {{ game["summary"]["over_under_avg"]|round(2) }}
                     </p>
                 </div>
 

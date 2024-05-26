@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 def dump(v):
-    return json.loads(json.dumps(v))
+    return str(json.loads(json.dumps(v)))
 
 def filter_duplicates(_list):
     _set = set()
