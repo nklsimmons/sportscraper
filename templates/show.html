@@ -47,12 +47,13 @@
                                     {% endif %}
 
                                     <span class="{{ game1_class }}">
-                                        {{ game1[0] }}: {{ game1[1] }}
+                                        {{ game1[0] }} {{ game1[1] }}
                                     </span>
 
                                     {% if game2[0] %}
+                                        <span> - </span>
                                         <span class="{{ game2_class }}">
-                                            {{ game2[0] }}: {{ game2[1] }}
+                                            {{ game2[0] }} {{ game2[1] }}
                                         </span>
                                     {% endif %}
 
@@ -78,10 +79,11 @@
                                     {% endif %}
 
                                     <span class="{{ over_class }}">
-                                        Over - {{ game["summary"]["over_under_sum"]["over"] }}
+                                        Over {{ game["summary"]["over_under_sum"]["over"] }}
                                     </span>
+                                    <span> - </span>
                                     <span class="{{ under_class }}">
-                                        Under - {{ game["summary"]["over_under_sum"]["under"] }}
+                                        Under {{ game["summary"]["over_under_sum"]["under"] }}
                                     </span>
                                 </div>
                             </div>
