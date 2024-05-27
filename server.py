@@ -102,6 +102,8 @@ def showDate(date):
 
             game_data[game]["games"].append(tg)
 
+        over_under_sum = {}
+
         if over_under_count:
             ou_count = sum(over_under_count[n] for n in over_under_count)
             ou_sum = sum(over_under_count[n] * float(n) for n in over_under_count)
@@ -114,7 +116,16 @@ def showDate(date):
         if len(sides_count_list) == 1:
             sides_count_list.append([0, 0])
 
+        over_under_sum = {"over": 0, "under": 0}
+
+        for v in over_under_count:
+            if float(v) < 0:
+                over_under_sum["under"] += over_under_count[v]
+            if float(v) > 0:
+                over_under_sum["over"] += over_under_count[v]
+
         game_data[game]["summary"] = {
+            "over_under_sum": over_under_sum,
             "over_under_count": over_under_count,
             "over_under_avg": over_under_avg,
             "sides_count": sides_count_list,

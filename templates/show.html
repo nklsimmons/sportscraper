@@ -25,52 +25,82 @@
 
                         <div class="card-body">
 
-                            <div class="card-title">
+                            <div class="card-title text-center">
                                 <h3>Summary</h3>
                             </div>
 
-                            <p>
-                                <b>Sides:</b>
+                            <div class="row">
+                                <div class="col text-end fw-bold">Sides:</div>
+                                <div class="col">
+                                    {% set game1 = game["summary"]["sides_count"][0] %}
+                                    {% set game2 = game["summary"]["sides_count"][1] %}
 
-                                {% set game1 = game["summary"]["sides_count"][0] %}
-                                {% set game2 = game["summary"]["sides_count"][1] %}
+                                    {% if game1[1] > game2[1] %}
+                                        {% set game1_class = "bg-success text-white" %}
+                                        {% set game2_class = "" %}
+                                    {% elif game1[1] < game2[1] %}
+                                        {% set game1_class = "" %}
+                                        {% set game2_class = "bg-success text-white" %}
+                                    {% else %}
+                                        {% set game1_class = "bg-warning" %}
+                                        {% set game2_class = "bg-warning" %}
+                                    {% endif %}
 
-                                {% if game1[1] > game2[1] %}
-                                    <span class="bg-success text-white">
+                                    <span class="{{ game1_class }}">
                                         {{ game1[0] }}: {{ game1[1] }}
                                     </span>
 
                                     {% if game2[0] %}
-                                        <span>
+                                        <span class="{{ game2_class }}">
                                             {{ game2[0] }}: {{ game2[1] }}
                                         </span>
                                     {% endif %}
 
-                                {% elif game1[1] < game2[1] %}
-                                    <span>
-                                        {{ game1[0] }}: {{ game1[1] }}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col text-end fw-bold">Over/Under:</div>
+                                <div class="col">
+
+                                    {% set over = game["summary"]["over_under_sum"]["over"] %}
+                                    {% set under = game["summary"]["over_under_sum"]["under"] %}
+
+                                    {% if over > under %}
+                                        {% set over_class = "bg-success text-white" %}
+                                        {% set under_class = "" %}
+                                    {% elif over < under %}
+                                        {% set over_class = "" %}
+                                        {% set under_class = "bg-success text-white" %}
+                                    {% else %}
+                                        {% set over_class = "bg-warning" %}
+                                        {% set under_class = "bg-warning" %}
+                                    {% endif %}
+
+                                    <span class="{{ over_class }}">
+                                        Over - {{ game["summary"]["over_under_sum"]["over"] }}
                                     </span>
-                                    <span class="bg-success text-white">
-                                        {{ game2[0] }}: {{ game2[1] }}
+                                    <span class="{{ under_class }}">
+                                        Under - {{ game["summary"]["over_under_sum"]["under"] }}
                                     </span>
-                                {% else %}
-                                    <span class="bg-warning">
-                                        {{ game1[0] }}: {{ game1[1] }}
-                                    </span>
-                                    <span class="bg-warning">
-                                        {{ game2[0] }}: {{ game2[1] }}
-                                    </span>
-                                {% endif %}
-                            </p>
-                            <p>
-                                <b>Over/Under:</b>
-                                {% for ou in game["summary"]["over_under_count"] %}
-                                    <div>
-                                        {% if '-' in ou %}Under {% else %}Over {% endif %}{{ ou|float|abs }}: {{ game["summary"]["over_under_count"][ou] }}
-                                    </div>
-                                {% endfor %}
-                                <b>Average O/U:</b> {{ game["summary"]["over_under_avg"]|round(2) }}
-                            </p>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col"></div>
+                                <div class="col">
+                                    {% for ou in game["summary"]["over_under_count"] %}
+                                        <div>
+                                            {% if '-' in ou %}Under {% else %}Over {% endif %}{{ ou|float|abs }}: {{ game["summary"]["over_under_count"][ou] }}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col text-end fw-bold">Average O/U:</div>
+                                <div class="col">{{ game["summary"]["over_under_avg"]|round(2) }}</div>
+                            </div>
                         </div>
                     </div>
 
@@ -80,11 +110,11 @@
                     <div class="card">
                         <div class="card-body">
 
-                            <div class="card-title">
+                            <div class="card-title text-center">
                                 <h3>Picks</h3>
                             </div>
 
-                            <table>
+                            <table class="table">
                                 <thead>
                                     <tr>
                                         <th>Profile</th>
