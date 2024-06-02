@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from dotenv import load_dotenv
-from functions import dump, filter_duplicates, date_string_to_date
+from src.functions import dump, filter_duplicates, date_string_to_date
 import os
 
 from flask import Flask, render_template
 from pymongo import MongoClient
 from datetime import datetime
 
-from app import scrape_data
+from src.app import scrape_data
 
 
 load_dotenv()
@@ -19,14 +19,51 @@ MONGODB_PASSWORD = os.getenv('MONGODB_PASSWORD')
 app = Flask(__name__)
 client = MongoClient(f"mongodb://{MONGODB_USER}:{MONGODB_PASSWORD}@{MONGODB_CONTAINER}")
 
-def get_last_update():
-    last_update_string = client["MLB"]["update_record"].find({}, {"datetime": 1}).sort({"datetime": -1})[0]["datetime"]
+def get_last_update(league="MLB"):
+    last_update_string = client[league]["update_record"].find({}, {"datetime": 1}).sort({"datetime": -1})[0]["datetime"]
     last_update = datetime.strptime(last_update_string, "%Y-%m-%d %H:%M:%S.%f")
     return last_update
 
 
+def get_league_dates_list(league):
+    entries = client[league.upper()]["covers"].find({}, {"date": 1})
+
+    unique_dates = filter_duplicates([e["date"] for e in entries])
+
+    dates_list = []
+
+    for date in unique_dates:
+        dates_list.append({
+            "name": date,
+            "date": str(date_string_to_date(date))
+        })
+
+    dates_list.sort(reverse=True, key=lambda d : d["date"])
+
+    return dates_list
+
+
 @app.route("/")
 def index():
+    mlb_dates_list = get_league_dates_list("MLB")
+    wnba_dates_list = get_league_dates_list("WNBA")
+
+    now = datetime.now()
+    time_since_last_update = now - get_last_update()
+    mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
+
+    dates_lists = {
+        "mlb": mlb_dates_list,
+        "wnba": wnba_dates_list,
+    }
+
+    return render_template('league_index.html',
+                           league_dates=dates_lists,
+                           mins_since_last_update=mins_since_last_update)
+
+
+@app.route("/leagues")
+def leagues_index():
     entries = client["MLB"]["covers"].find({}, {"date": 1})
 
     unique_dates = filter_duplicates([e["date"] for e in entries])
@@ -45,20 +82,21 @@ def index():
     time_since_last_update = now - get_last_update()
     mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
 
-    return render_template('index.html',
+    return render_template('league_index.html',
                            latest=dates_list[0],
                            dates=dates_list[1:],
                            mins_since_last_update=mins_since_last_update)
 
 
-@app.route("/picks/<date>")
-def showDate(date):
+@app.route("/picks/<league>/<date>")
+def showLeagueDate(league, date):
+    league = league.upper()
     picks_datetime = datetime.strptime(date, "%Y-%m-%d")
     date_str = picks_datetime.strftime("%A, %B %-d")
 
     games = set()
 
-    days = client["MLB"]["covers"].find({"date": date_str})
+    days = client[league]["covers"].find({"date": date_str})
     for t in days:
         games.add(t["game"])
 
@@ -69,7 +107,7 @@ def showDate(date):
         except KeyError:
             game_data[game] = {"games": [], "summary": dict()}
 
-        days_games = client["MLB"]["covers"].find(
+        days_games = client[league]["covers"].find(
             {
                 "game": game,
                 "date": date_str
@@ -148,26 +186,29 @@ def showDate(date):
     mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
 
     return render_template('show.html',
+                           league=league,
                            data=game_data_list,
                            date=date_str,
                            mins_since_last_update=mins_since_last_update)
 
 
-@app.route("/run")
-def run():
-    dataset = scrape_data()
+@app.route("/run/<league>")
+def run(league):
+    league = league.upper()
+
+    dataset = scrape_data(league)
 
     for data in dataset:
-        existing = client["MLB"]["covers"].find_one({
+        existing = client[league]["covers"].find_one({
             "profile": data["profile"],
             "date": data["date"],
             "game": data["game"],
         })
 
         if not existing:
-            client["MLB"]["covers"].insert_one(data)
+            client[league]["covers"].insert_one(data)
 
-    client["MLB"]["update_record"].insert_one({
+    client[league]["update_record"].insert_one({
         "datetime": str(datetime.now())
     })
 

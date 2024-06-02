@@ -1,6 +1,7 @@
 from pprint import pprint
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
+from src.functions import dump
 
 """
 "REGULAR SEASON" TAB
@@ -42,11 +43,26 @@ Under 9, under 8 = 2 clev under picks at 8.5
 
 """
 
+LEAGUES = ("MLB", "WNBA")
 
-def scrape_data():
+
+def scrape_data(league):
+
+    if league not in LEAGUES:
+        raise Exception("League is empty or not supported")
+
+    # MLB
     # https://contests.covers.com/kingofcovers/cdd9afbe-a974-418f-a86f-b13f013c3e1d
+
+    # WNBA
+    # https://contests.covers.com/kingofcovers/a84a7067-afcc-47b1-88c6-b16f00d2e70d
+
     base_url = "https://contests.covers.com"
-    url = "/kingofcovers/cdd9afbe-a974-418f-a86f-b13f013c3e1d"
+
+    if league == "MLB":
+        url = "/kingofcovers/cdd9afbe-a974-418f-a86f-b13f013c3e1d"
+    if league == "WNBA":
+        url = "/kingofcovers/a84a7067-afcc-47b1-88c6-b16f00d2e70d"
 
     with urlopen(base_url + url) as main_page:
         html_bytes = main_page.read()
@@ -57,22 +73,6 @@ def scrape_data():
     table = soup.find_all("table", class_="leaderboard")[0]
 
     rows = table.find("tbody").find_all("tr")
-
-    data = []
-
-    """
-    Grab profile links of top 10 users
-    Grab their pending pics
-    Add everything to The Array
-    Repeat
-
-    Save everything in a MongoDB instance, I guess
-
-    Might as well save everything for history's sake
-
-    Run this every hour ig
-
-    """
 
     data = []
 
@@ -110,7 +110,6 @@ def scrape_data():
                 "game": ' - '.join(clean_text(picks_tds[0].text)),
                 "time": ''.join(clean_text(picks_tds[2].text)),
                 "pick": parse_picks(clean_text(picks_tds[3].text)),
-                # "units": clean_text(picks_tds[4].text),
             })
 
     return data
