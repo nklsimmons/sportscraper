@@ -1,7 +1,7 @@
 from pprint import pprint
 from urllib.request import urlopen
 from bs4 import BeautifulSoup
-from src.functions import dump
+from functions import dump
 
 """
 "REGULAR SEASON" TAB

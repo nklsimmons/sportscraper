@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 from dotenv import load_dotenv
-from src.functions import dump, filter_duplicates, date_string_to_date
+from functions import dump, filter_duplicates, date_string_to_date
 import os
 
 from flask import Flask, render_template
 from pymongo import MongoClient
 from datetime import datetime
 
-from src.app import scrape_data
+from app import scrape_data
 
 
 load_dotenv()
