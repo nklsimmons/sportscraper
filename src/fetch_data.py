@@ -6,7 +6,7 @@ from datetime import datetime
 
 from app import scrape_data
 
-from pprint import pprint
+# from pprint import pprint
 
 # docker exec sportscraper3-backend-1 python fetch_data.py
 
@@ -16,26 +16,28 @@ MONGODB_CONTAINER = os.getenv('MONGODB_CONTAINER')
 MONGODB_USER = os.getenv('MONGODB_USER')
 MONGODB_PASSWORD = os.getenv('MONGODB_PASSWORD')
 
-dataset = scrape_data()
+for league in ["MLB", "WNBA"]
 
-n_added = 0
+    dataset = scrape_data(league)
 
-client = MongoClient(f"mongodb://{MONGODB_USER}:{MONGODB_PASSWORD}@{MONGODB_CONTAINER}")
+    n_added = 0
 
-for data in dataset:
+    client = MongoClient(f"mongodb://{MONGODB_USER}:{MONGODB_PASSWORD}@{MONGODB_CONTAINER}")
 
-    existing = client["MLB"]["covers"].find_one({
-        "profile": data["profile"],
-        "date": data["date"],
-        "game": data["game"],
+    for data in dataset:
+
+        existing = client[league]["covers"].find_one({
+            "profile": data["profile"],
+            "date": data["date"],
+            "game": data["game"],
+        })
+
+        if not existing:
+            client[league]["covers"].insert_one(data)
+            n_added += 1
+
+    client[league]["update_record"].insert_one({
+        "datetime": str(datetime.now())
     })
 
-    if not existing:
-        client["MLB"]["covers"].insert_one(data)
-        n_added += 1
-
-client["MLB"]["update_record"].insert_one({
-    "datetime": str(datetime.now())
-})
-
-print(f"{len(dataset)} records fetched, {n_added} inserted")
+    print(f"{league}: {len(dataset)} records fetched, {n_added} inserted\n")
