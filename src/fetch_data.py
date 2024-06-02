@@ -16,8 +16,7 @@ MONGODB_CONTAINER = os.getenv('MONGODB_CONTAINER')
 MONGODB_USER = os.getenv('MONGODB_USER')
 MONGODB_PASSWORD = os.getenv('MONGODB_PASSWORD')
 
-for league in ["MLB", "WNBA"]
-
+for league in ["MLB", "WNBA"]:
     dataset = scrape_data(league)
 
     n_added = 0
