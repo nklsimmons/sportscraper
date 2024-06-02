@@ -118,7 +118,7 @@ def showLeagueDate(league, date):
         sides_count = dict()
 
         for tg in days_games:
-            if tg["time"] and "," in tg["time"]:
+            if tg["time"] and ":" in tg["time"]:
                 game_time = tg["time"]
 
             if tg["pick"].get("O/U"):
