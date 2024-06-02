@@ -43,57 +43,7 @@ def get_league_dates_list(league):
     return dates_list
 
 
-@app.route("/")
-def index():
-    mlb_dates_list = get_league_dates_list("MLB")
-    wnba_dates_list = get_league_dates_list("WNBA")
-
-    now = datetime.now()
-    time_since_last_update = now - get_last_update()
-    mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
-
-    dates_lists = {
-        "mlb": mlb_dates_list,
-        "wnba": wnba_dates_list,
-    }
-
-    return render_template('league_index.html',
-                           league_dates=dates_lists,
-                           mins_since_last_update=mins_since_last_update)
-
-
-@app.route("/leagues")
-def leagues_index():
-    entries = client["MLB"]["covers"].find({}, {"date": 1})
-
-    unique_dates = filter_duplicates([e["date"] for e in entries])
-
-    dates_list = []
-
-    for date in unique_dates:
-        dates_list.append({
-            "name": date,
-            "date": str(date_string_to_date(date))
-        })
-
-    dates_list.sort(reverse=True, key=lambda d : d["date"])
-
-    now = datetime.now()
-    time_since_last_update = now - get_last_update()
-    mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
-
-    return render_template('league_index.html',
-                           latest=dates_list[0],
-                           dates=dates_list[1:],
-                           mins_since_last_update=mins_since_last_update)
-
-
-@app.route("/picks/<league>/<date>")
-def showLeagueDate(league, date):
-    league = league.upper()
-    picks_datetime = datetime.strptime(date, "%Y-%m-%d")
-    date_str = picks_datetime.strftime("%A, %B %-d")
-
+def compile_game_data(league, date_str):
     games = set()
 
     days = client[league]["covers"].find({"date": date_str})
@@ -181,6 +131,62 @@ def showLeagueDate(league, date):
             "summary": game_data[game]["summary"],
         })
     game_data_list.sort(key=lambda g : g["time"])
+
+    return game_data_list
+
+
+@app.route("/")
+def index():
+    mlb_dates_list = get_league_dates_list("MLB")
+    wnba_dates_list = get_league_dates_list("WNBA")
+
+    now = datetime.now()
+    time_since_last_update = now - get_last_update()
+    mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
+
+    dates_lists = {
+        "mlb": mlb_dates_list,
+        "wnba": wnba_dates_list,
+    }
+
+    return render_template('league_index.html',
+                           league_dates=dates_lists,
+                           mins_since_last_update=mins_since_last_update)
+
+
+@app.route("/leagues")
+def leagues_index():
+    entries = client["MLB"]["covers"].find({}, {"date": 1})
+
+    unique_dates = filter_duplicates([e["date"] for e in entries])
+
+    dates_list = []
+
+    for date in unique_dates:
+        dates_list.append({
+            "name": date,
+            "date": str(date_string_to_date(date))
+        })
+
+    dates_list.sort(reverse=True, key=lambda d : d["date"])
+
+    now = datetime.now()
+    time_since_last_update = now - get_last_update()
+    mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
+
+    return render_template('league_index.html',
+                           latest=dates_list[0],
+                           dates=dates_list[1:],
+                           mins_since_last_update=mins_since_last_update)
+
+
+@app.route("/picks/<league>/<date>")
+def showLeagueDate(league, date):
+    league = league.upper()
+    picks_datetime = datetime.strptime(date, "%Y-%m-%d")
+    date_str = picks_datetime.strftime("%A, %B %-d")
+
+    game_data_list = compile_game_data(league, date_str)
 
     now = datetime.now()
     time_since_last_update = now - get_last_update(league)
