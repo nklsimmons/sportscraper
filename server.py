@@ -113,14 +113,15 @@ def showLeagueDate(league, date):
                 "date": date_str
             }, {"_id": 0})
 
+        game_time = None
         over_under_count = dict()
         sides_count = dict()
 
         for tg in days_games:
-            game_time = tg["time"]
+            if tg["time"] and "," in tg["time"]:
+                game_time = tg["time"]
 
             if tg["pick"].get("O/U"):
-
                 over_under_value = float(tg["pick"].get("O/U")[1])
                 if tg["pick"].get("O/U")[0] == "Under":
                     over_under_value = over_under_value * -1
@@ -167,7 +168,7 @@ def showLeagueDate(league, date):
             "over_under_count": over_under_count,
             "over_under_avg": over_under_avg,
             "sides_count": sides_count_list,
-            "time": game_time
+            "time": game_time if game_time else ""
         }
 
     # I am too fucking tired to do a proper refactor so this will have to do for now

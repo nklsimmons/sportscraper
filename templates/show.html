@@ -16,7 +16,7 @@
 
         {% for game in data %}
             <div>
-                <h2>{{ game["name"] }} ({{ game["summary"]["time"] }})</h2>
+                <h2>{{ game["name"] }} {% if game["summary"]["time"] %}({{ game["summary"]["time"] }})</h2>{% endif %}
 
                 <div class="row">
 
