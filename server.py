@@ -182,7 +182,7 @@ def showLeagueDate(league, date):
     game_data_list.sort(key=lambda g : g["time"])
 
     now = datetime.now()
-    time_since_last_update = now - get_last_update()
+    time_since_last_update = now - get_last_update(league)
     mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
 
     return render_template('show.html',
