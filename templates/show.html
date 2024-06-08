@@ -29,36 +29,40 @@
                                 <h3>Summary</h3>
                             </div>
 
-                            <div class="row">
-                                <div class="col text-end fw-bold">Sides:</div>
-                                <div class="col">
-                                    {% set game1 = game["summary"]["sides_count"][0] %}
-                                    {% set game2 = game["summary"]["sides_count"][1] %}
+                            {% if game["summary"]["sides_count"][0] %}
 
-                                    {% if game1[1] > game2[1] %}
-                                        {% set game1_class = "bg-success text-white" %}
-                                        {% set game2_class = "" %}
-                                    {% elif game1[1] < game2[1] %}
-                                        {% set game1_class = "" %}
-                                        {% set game2_class = "bg-success text-white" %}
-                                    {% else %}
-                                        {% set game1_class = "bg-warning" %}
-                                        {% set game2_class = "bg-warning" %}
-                                    {% endif %}
+                                <div class="row">
+                                    <div class="col text-end fw-bold">Sides:</div>
+                                    <div class="col">
+                                        {% set game1 = game["summary"]["sides_count"][0] %}
+                                        {% set game2 = game["summary"]["sides_count"][1] %}
 
-                                    <span class="{{ game1_class }}">
-                                        {{ game1[0] }} {{ game1[1] }}
-                                    </span>
+                                        {% if game1[1] > game2[1] %}
+                                            {% set game1_class = "bg-success text-white" %}
+                                            {% set game2_class = "" %}
+                                        {% elif game1[1] < game2[1] %}
+                                            {% set game1_class = "" %}
+                                            {% set game2_class = "bg-success text-white" %}
+                                        {% else %}
+                                            {% set game1_class = "bg-warning" %}
+                                            {% set game2_class = "bg-warning" %}
+                                        {% endif %}
 
-                                    {% if game2[0] %}
-                                        <span> - </span>
-                                        <span class="{{ game2_class }}">
-                                            {{ game2[0] }} {{ game2[1] }}
+                                        <span class="{{ game1_class }}">
+                                            {{ game1[0] }} {{ game1[1] }}
                                         </span>
-                                    {% endif %}
 
+                                        {% if game2[0] %}
+                                            <span> - </span>
+                                            <span class="{{ game2_class }}">
+                                                {{ game2[0] }} {{ game2[1] }}
+                                            </span>
+                                        {% endif %}
+
+                                    </div>
                                 </div>
-                            </div>
+
+                            {% endif %}
 
                             <div class="row">
                                 <div class="col text-end fw-bold">Over/Under:</div>
