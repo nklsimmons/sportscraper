@@ -6,22 +6,18 @@ from datetime import datetime
 
 from app import scrape_data
 
-# from pprint import pprint
-
 # docker exec sportscraper3-backend-1 python fetch_data.py
 
 load_dotenv()
 
-MONGODB_CONTAINER = os.getenv('MONGODB_CONTAINER')
-MONGODB_USER = os.getenv('MONGODB_USER')
-MONGODB_PASSWORD = os.getenv('MONGODB_PASSWORD')
+MONGO_CONNECTION_STRING = os.getenv('MONGO_CONNECTION_STRING')
 
 for league in ["MLB", "WNBA"]:
     dataset = scrape_data(league)
 
     n_added = 0
 
-    client = MongoClient(f"mongodb://{MONGODB_USER}:{MONGODB_PASSWORD}@{MONGODB_CONTAINER}")
+    client = MongoClient(MONGO_CONNECTION_STRING)
 
     for data in dataset:
 
