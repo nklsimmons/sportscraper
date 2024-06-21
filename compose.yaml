@@ -1,6 +1,7 @@
 services:
   web:
     image: nginx
+    container_name: sportscraper-web
     volumes:
       - ./nginx/nginx.conf:/tmp/nginx.conf
     environment:
@@ -12,10 +13,12 @@ services:
       - backend
 
   backend:
+    container_name: sportscraper-backend
     build:
       target: builder
     # flask requires SIGINT to stop gracefully
     # (default stop signal from Compose is SIGTERM)
+    restart: always
     stop_signal: SIGINT
     environment:
       - FLASK_SERVER_PORT=9091
@@ -26,7 +29,7 @@ services:
 
   mongodb:
     image: mongo:6-jammy
-    container_name: mongodb
+    container_name: sportscraper-db
     ports:
       - '27117:27017'
     volumes:
