@@ -4,7 +4,9 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 from datetime import datetime
 
-from app import scrape_data
+from functions import dump
+from app import scrape_data, scrape_data_v2
+from pprint import pprint
 
 # docker exec sportscraper3-backend-1 python fetch_data.py
 

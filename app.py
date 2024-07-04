@@ -1,5 +1,6 @@
 from pprint import pprint
 from urllib.request import urlopen
+from urllib.parse import urlencode
 from bs4 import BeautifulSoup
 from functions import dump
 
@@ -113,6 +114,121 @@ def scrape_data(league):
             })
 
     return data
+
+
+def scrape_data_v2(league):
+
+    if league not in LEAGUES:
+        raise Exception("League is empty or not supported")
+
+    # MLB
+    # https://contests.covers.com/consensus/pickleaders/mlb?totalPicks=500&orderBy=Units&orderPickBy=StraightUp
+
+    # WNBA
+
+    base_url = "https://contests.covers.com"
+
+    if league == "MLB":
+        url = "/consensus/pickleaders/mlb?"
+        query = urlencode({
+            "totalPicks": "500",
+            "orderBy": "Units",
+            "orderPickBy": "StraightUp",
+        })
+    if league == "WNBA":
+        pass
+        # url = "/kingofcovers/a84a7067-afcc-47b1-88c6-b16f00d2e70d"
+
+    with urlopen(base_url + url + query) as main_page:
+        html_bytes = main_page.read()
+        html = html_bytes.decode("utf-8")
+        soup = BeautifulSoup(html, "html.parser")
+
+    """
+    Get day's leaders from leaderboard
+    """
+
+    leaderboard_table = soup.find_all("table", class_="leaderboard")[0]
+    leaderboard_rows = leaderboard_table.find("tbody").find_all("tr")
+
+    leaders = []
+    for leaderboard_row in leaderboard_rows:
+        leaderboard_tds = leaderboard_row.find_all("td")
+
+        l = {
+            "rank": leaderboard_tds[0].text.strip(),
+            "user": leaderboard_tds[1].text.strip(),
+            "units": leaderboard_tds[2].text.strip(),
+            "sides": leaderboard_tds[3].text.strip(),
+            "diff": leaderboard_tds[4].text.strip(),
+            "win_rate": leaderboard_tds[5].text.strip(),
+        }
+
+        has_pending_picks = leaderboard_tds[1].find("img", alt="mlb Pending Picks") is not None
+        l["pending_picks_url"] = leaderboard_tds[1].find("img", alt="mlb Pending Picks").parent["href"] if has_pending_picks else None
+
+        leaders.append(l)
+
+    """
+    Get picks from leaders
+    """
+
+    for leader in leaders:
+        if leader["pending_picks_url"] is None:
+            continue
+
+        with urlopen(leader["pending_picks_url"]) as picks_page:
+            html_bytes = picks_page.read()
+            html = html_bytes.decode("utf-8")
+            soup = BeautifulSoup(html, "html.parser")
+
+        date = soup.find("div", class_="main_bar").find("h3").text
+
+        picks_table = soup.find("table", class_="cmg_contests_pendingpicks")
+        picks_rows = picks_table.find("tbody").find_all("tr")
+
+        leader_picks = []
+        for picks_row in picks_rows:
+            picks_tds = picks_row.find_all("td")
+
+            # Skip games in progress
+            if picks_tds[1].text.strip() != "-\n\n-":
+                continue
+
+            game_string = picks_tds[0].text.strip()
+            game = ' - '.join(filter(lambda x : x, (g.strip() for g in game_string.split('\n'))))
+
+            # O/Us and Sides
+            pick = picks_tds[3].text.strip()
+
+            if pick.find('\n') != -1:
+                continue
+
+            parsed_picks = list(filter(lambda x : x, (p.strip() for p in pick.split('\n'))))
+
+            picks = {}
+            if len(parsed_picks) > 1:
+                picks["sides"] = parsed_picks[0]
+                picks["ou"] = parsed_picks[1]
+            elif parsed_picks[0].find("Over") != -1 or parsed_picks[0].find("Under") != -1:
+                picks["sides"] = None
+                picks["ou"] = parsed_picks[0]
+            else:
+                picks["sides"] = parsed_picks[0]
+                picks["ou"] = None
+
+            leader_pick = {
+                "date": date,
+                "game": game,
+                # "score": picks_tds[1].text.strip(),
+                "status": picks_tds[2].text.strip(),
+                "pick": picks,
+            }
+            leader_picks.append(leader_pick)
+
+        leader["picks"] = leader_picks
+
+    return leaders
 
 
 def clean_text(text):

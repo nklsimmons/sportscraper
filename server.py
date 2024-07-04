@@ -7,7 +7,7 @@ from flask import Flask, render_template
 from pymongo import MongoClient
 from datetime import datetime
 
-from app import scrape_data
+from app import scrape_data, scrape_data_v2
 
 
 load_dotenv()

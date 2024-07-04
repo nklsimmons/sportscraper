@@ -2,8 +2,11 @@ import json
 from datetime import datetime
 
 
-def dump(v):
-    return str(json.loads(json.dumps(v)))
+def dump(v, x=True):
+    print(
+        str(json.loads(json.dumps(v)))
+    )
+    if x: exit()
 
 def filter_duplicates(_list):
     _set = set()
