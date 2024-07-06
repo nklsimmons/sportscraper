@@ -23,8 +23,11 @@ def get_last_update(league="MLB"):
     return last_update
 
 
-def get_league_dates_list(league):
-    entries = client[league.upper()]["covers"].find({}, {"date": 1})
+def get_league_dates_list(league, v2=False):
+    if v2:
+        entries = client[league.upper()]["covers_v2"].find({}, {"date": 1})
+    else:
+        entries = client[league.upper()]["covers"].find({}, {"date": 1})
 
     unique_dates = filter_duplicates([e["date"] for e in entries])
 
@@ -133,10 +136,105 @@ def compile_game_data(league, date_str):
     return game_data_list
 
 
+def compile_game_data_v2(league, date_str):
+    games = set()
+
+    days = client[league]["covers_v2"].find({"date": date_str})
+    for t in days:
+        games.add(t["game"])
+
+    game_data = dict()
+    for game in games:
+        try:
+            game_data[game]
+        except KeyError:
+            game_data[game] = {"games": [], "summary": dict()}
+
+        days_games = client[league]["covers_v2"].find(
+            {
+                "game": game,
+                "date": date_str
+            }, {"_id": 0})
+
+        game_time = None
+        over_under_count = dict()
+        sides_count = dict()
+
+        for tg in days_games:
+            if tg["status"] and ":" in tg["status"]:
+                game_time = tg["status"]
+
+            if tg["pick"].get("O/U"):
+                over_under_value = float(tg["pick"].get("O/U")[1])
+                if tg["pick"].get("O/U")[0] == "Under":
+                    over_under_value = over_under_value * -1
+
+                try:
+                    over_under_count[str(over_under_value)] += 1
+                except KeyError:
+                    over_under_count[str(over_under_value)] = 1
+
+            if tg["pick"].get("Side"):
+                side = tg["pick"].get("Side")[0]
+
+                try:
+                    sides_count[side] += 1
+                except KeyError:
+                    sides_count[side] = 1
+
+            game_data[game]["games"].append(tg)
+
+        over_under_sum = {}
+
+        if over_under_count:
+            ou_count = sum(over_under_count[n] for n in over_under_count)
+            ou_sum = sum(over_under_count[n] * float(n) for n in over_under_count)
+            over_under_avg = ou_sum / ou_count
+        else:
+            over_under_avg = 0
+
+        sides_count_list = [[side, sides_count[side]] for side in sides_count]
+
+        if len(sides_count_list) == 1:
+            sides_count_list.append([0, 0])
+
+        over_under_sum = {"over": 0, "under": 0}
+
+        for v in over_under_count:
+            if float(v) < 0:
+                over_under_sum["under"] += over_under_count[v]
+            if float(v) > 0:
+                over_under_sum["over"] += over_under_count[v]
+
+        game_data[game]["summary"] = {
+            "over_under_sum": over_under_sum,
+            "over_under_count": over_under_count,
+            "over_under_avg": over_under_avg,
+            "sides_count": sides_count_list,
+            "time": game_time if game_time else ""
+        }
+
+    # I am too fucking tired to do a proper refactor so this will have to do for now
+    game_data_list = []
+    for game in game_data:
+        game_data_list.append({
+            "name": game,
+            "time": game_data[game]["games"][0]["status"],
+            "picks": game_data[game]["games"],
+            "summary": game_data[game]["summary"],
+        })
+    game_data_list.sort(key=lambda g : g["time"])
+
+    return game_data_list
+
+
 @app.route("/")
 def index():
     mlb_dates_list = get_league_dates_list("MLB")
     wnba_dates_list = get_league_dates_list("WNBA")
+
+    mlb_dates_list_v2 = get_league_dates_list("MLB", v2=True)
+    wnba_dates_list_v2 = get_league_dates_list("WNBA", v2=True)
 
     now = datetime.now()
     time_since_last_update = now - get_last_update()
@@ -145,6 +243,8 @@ def index():
     dates_lists = {
         "mlb": mlb_dates_list,
         "wnba": wnba_dates_list,
+        "mlb_v2": mlb_dates_list_v2,
+        "wnba_v2": wnba_dates_list_v2,
     }
 
     return render_template('league_index.html',
@@ -191,6 +291,25 @@ def showLeagueDate(league, date):
     mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
 
     return render_template('show.html',
+                           league=league,
+                           data=game_data_list,
+                           date=date_str,
+                           mins_since_last_update=mins_since_last_update)
+
+
+@app.route("/picks/v2/<league>/<date>")
+def showLeagueDateV2(league, date):
+    league = league.upper()
+    picks_datetime = datetime.strptime(date, "%Y-%m-%d")
+    date_str = picks_datetime.strftime("%A, %B %-d")
+
+    game_data_list = compile_game_data_v2(league, date_str)
+
+    now = datetime.now()
+    time_since_last_update = now - get_last_update(league)
+    mins_since_last_update = int(time_since_last_update.total_seconds() / 60)
+
+    return render_template('show_v2.html',
                            league=league,
                            data=game_data_list,
                            date=date_str,

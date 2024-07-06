@@ -26,7 +26,7 @@ for league in ["MLB"]:
         for pick in profile.get("picks", []):
 
             existing = client[league]["covers_v2"].find_one({
-                "profile": profile["user"],
+                "user": profile["user"],
                 "date": pick["date"],
                 "game": pick["game"],
             })

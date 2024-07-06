@@ -15,18 +15,40 @@
         <div class="row">
             <div class="col">
                 <h2>MLB</h2>
-                <h3>Latest: <a href="picks/mlb/{{ league_dates["mlb"][0]["date"] }}">{{ league_dates["mlb"][0]["name"] }}</a></h3>
+                <h3>Latest: <a href="picks/v2/mlb/{{ league_dates["mlb"][0]["date"] }}">{{ league_dates["mlb"][0]["name"] }}</a></h3>
             </div>
 
             <div class="col">
                 <h2>WNBA</h2>
-                <h3>Latest: <a href="picks/wnba/{{ league_dates["wnba"][0]["date"] }}">{{ league_dates["wnba"][0]["name"] }}</a></h3>
             </div>
+
+            {# <div class="col">
+                <h2>WNBA</h2>
+                <h3>Latest: <a href="picks/wnba/{{ league_dates["wnba"][0]["date"] }}">{{ league_dates["wnba"][0]["name"] }}</a></h3>
+            </div> #}
         </div>
 
         <hr>
 
         <h3>Archive:</h3>
+
+        <div class="row">
+            <div class="col">
+                {% for date in league_dates["mlb_v2"][1:] %}
+                    <h4><a href="picks/v2/mlb/{{ date["date"] }}">{{ date["name"] }}</a></h4>
+                {% endfor %}
+            </div>
+
+            {# <div class="col">
+                {% for date in league_dates["wnba"][1:] %}
+                    <h4><a href="picks/wnba/{{ date["date"] }}">{{ date["name"] }}</a></h4>
+                {% endfor %}
+            </div> #}
+        </div>
+
+        <hr>
+
+        <h3>Archive (Old Method):</h3>
 
         <div class="row">
             <div class="col">
