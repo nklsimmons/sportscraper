@@ -21,9 +21,6 @@ for league in ["MLB"]:
 
     client = MongoClient(MONGO_CONNECTION_STRING)
 
-    # Testing
-    client[league]["covers_v2"]
-
     for profile in dataset:
 
         for pick in profile.get("picks", []):
@@ -50,6 +47,9 @@ for league in ["MLB"]:
                 pick_f["Side"] = None
 
             data = {
+                "date": pick["date"],
+                "game": pick["game"],
+                "status": pick["status"],
                 "rank": profile["rank"],
                 "sides": profile["sides"],
                 "units": profile["units"],
