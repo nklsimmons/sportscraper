@@ -201,7 +201,7 @@ def showLeagueDate(league, date):
 def run(league):
     league = league.upper()
 
-    dataset = scrape_data(league)
+    dataset = scrape_data_v2(league)
 
     for data in dataset:
         existing = client[league]["covers"].find_one({

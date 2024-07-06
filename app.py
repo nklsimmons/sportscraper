@@ -118,7 +118,7 @@ def scrape_data(league):
 
 def scrape_data_v2(league):
 
-    if league not in LEAGUES:
+    if league not in ("MLB"):
         raise Exception("League is empty or not supported")
 
     # MLB
