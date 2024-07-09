@@ -8,7 +8,7 @@ from functions import dump
 from app import scrape_data, scrape_data_v2
 from pprint import pprint
 
-# docker exec sportscraper3-backend-1 python fetch_data.py
+# docker exec sportscraper-backend python fetch_data_v2.py
 
 load_dotenv()
 
