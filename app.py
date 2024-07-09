@@ -177,7 +177,9 @@ def scrape_data_v2(league):
         if leader["pending_picks_url"] is None:
             continue
 
-        with urlopen(leader["pending_picks_url"]) as picks_page:
+        picks_url = leader["pending_picks_url"].replace(" ", "%20")
+
+        with urlopen(picks_url) as picks_page:
             html_bytes = picks_page.read()
             html = html_bytes.decode("utf-8")
             soup = BeautifulSoup(html, "html.parser")
