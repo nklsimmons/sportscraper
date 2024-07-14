@@ -3,11 +3,11 @@ from dotenv import load_dotenv
 from functions import dump, filter_duplicates, date_string_to_date
 import os
 
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from pymongo import MongoClient
 from datetime import datetime
 
-from app import scrape_data, scrape_data_v2
+from app import scrape_data, DebugError
 
 
 load_dotenv()
@@ -139,7 +139,7 @@ def compile_game_data(league, date_str):
 def compile_game_data_v2(league, date_str):
     games = set()
 
-    days = client[league]["covers_v2"].find({"date": date_str})
+    days = client[league]["covers_v2"].find({"date": date_str, "type": {"$exists": True}})
     for t in days:
         games.add(t["game"])
 
@@ -153,7 +153,8 @@ def compile_game_data_v2(league, date_str):
         days_games = client[league]["covers_v2"].find(
             {
                 "game": game,
-                "date": date_str
+                "date": date_str,
+                "type": {"$exists": True}
             }, {"_id": 0})
 
         game_time = None
@@ -164,7 +165,15 @@ def compile_game_data_v2(league, date_str):
             if tg["status"] and ":" in tg["status"]:
                 game_time = tg["status"]
 
-            if tg["pick"].get("O/U"):
+            if tg["type"] == "sides" and tg["pick"].get("Side"):
+                side = tg["pick"].get("Side")[0]
+
+                try:
+                    sides_count[side] += 1
+                except KeyError:
+                    sides_count[side] = 1
+
+            elif tg["type"] == "totals" and tg["pick"].get("O/U"):
                 over_under_value = float(tg["pick"].get("O/U")[1])
                 if tg["pick"].get("O/U")[0] == "Under":
                     over_under_value = over_under_value * -1
@@ -174,13 +183,8 @@ def compile_game_data_v2(league, date_str):
                 except KeyError:
                     over_under_count[str(over_under_value)] = 1
 
-            if tg["pick"].get("Side"):
-                side = tg["pick"].get("Side")[0]
-
-                try:
-                    sides_count[side] += 1
-                except KeyError:
-                    sides_count[side] = 1
+            else:
+                continue
 
             game_data[game]["games"].append(tg)
 
@@ -303,7 +307,10 @@ def showLeagueDateV2(league, date):
     picks_datetime = datetime.strptime(date, "%Y-%m-%d")
     date_str = picks_datetime.strftime("%A, %B %-d")
 
-    game_data_list = compile_game_data_v2(league, date_str)
+    try:
+        game_data_list = compile_game_data_v2(league, date_str)
+    except DebugError as e:
+        return jsonify(e.data)
 
     now = datetime.now()
     time_since_last_update = now - get_last_update(league)
@@ -316,27 +323,27 @@ def showLeagueDateV2(league, date):
                            mins_since_last_update=mins_since_last_update)
 
 
-@app.route("/run/<league>")
-def run(league):
-    league = league.upper()
+# @app.route("/run/<league>")
+# def run(league):
+#     league = league.upper()
 
-    dataset = scrape_data_v2(league)
+#     dataset = scrape_data_v2(league)
 
-    for data in dataset:
-        existing = client[league]["covers"].find_one({
-            "profile": data["profile"],
-            "date": data["date"],
-            "game": data["game"],
-        })
+#     for data in dataset:
+#         existing = client[league]["covers"].find_one({
+#             "profile": data["profile"],
+#             "date": data["date"],
+#             "game": data["game"],
+#         })
 
-        if not existing:
-            client[league]["covers"].insert_one(data)
+#         if not existing:
+#             client[league]["covers"].insert_one(data)
 
-    client[league]["update_record"].insert_one({
-        "datetime": str(datetime.now())
-    })
+#     client[league]["update_record"].insert_one({
+#         "datetime": str(datetime.now())
+#     })
 
-    return "Success"
+#     return "Success"
 
 
 if __name__ == "__main__":
