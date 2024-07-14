@@ -135,13 +135,13 @@
                                                 <a href="{{ pick["pending_picks_url"] }}" target="_blank">{{ pick["user"] }}</a>
                                             </td>
 
-                                            {% if pick["pick"].get("O/U") %}
+                                            {% if pick["type"] == "totals" and pick["pick"].get("O/U") %}
                                                 <td>{{ ' '.join(pick["pick"]["O/U"]) }}</td>
                                             {% else %}
                                                 <td>n/a</td>
                                             {% endif %}
 
-                                            {% if pick["pick"].get("Side") %}
+                                            {% if pick["type"] == "sides" and pick["pick"].get("Side") %}
                                                 <td>{{ ' '.join(pick["pick"]["Side"]) }}</td>
                                             {% else %}
                                                 <td>n/a</td>
