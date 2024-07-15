@@ -5,7 +5,7 @@ from pymongo import MongoClient
 from datetime import datetime
 
 from functions import dump
-from app import scrape_data, get_sides_data, get_totals_data
+from app import scrape_data, get_money_leaders_picks
 from pprint import pprint
 
 # docker exec sportscraper-backend python fetch_data_v2.py
@@ -15,8 +15,8 @@ load_dotenv()
 MONGO_CONNECTION_STRING = os.getenv('MONGO_CONNECTION_STRING')
 
 for league in ["MLB"]:
-    sides_data = get_sides_data(league)
-    totals_data = get_totals_data(league)
+    sides_data = get_money_leaders_picks(league, orderPickBy="StraightUp")
+    totals_data = get_money_leaders_picks(league, orderPickBy="Totals")
 
     n_added = 0
 
