@@ -221,6 +221,8 @@ def compile_game_data_v2(league, date_str):
     # I am too fucking tired to do a proper refactor so this will have to do for now
     game_data_list = []
     for game in game_data:
+        if not game_data[game]["games"]:
+            continue
         game_data_list.append({
             "name": game,
             "time": game_data[game]["games"][0]["status"],
