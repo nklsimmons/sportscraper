@@ -14,7 +14,7 @@ load_dotenv()
 
 MONGO_CONNECTION_STRING = os.getenv('MONGO_CONNECTION_STRING')
 
-for league in ["MLB"]:
+for league in ["MLB", "WNBA", "NCAAF", "NBA", "NFL"]:
     sides_data = get_money_leaders_picks(league, orderPickBy="StraightUp")
     totals_data = get_money_leaders_picks(league, orderPickBy="Totals")
 
