@@ -14,14 +14,20 @@ load_dotenv()
 
 MONGO_CONNECTION_STRING = os.getenv('MONGO_CONNECTION_STRING')
 
-for league in ["MLB", "WNBA", "NCAAF", "NBA", "NFL"]:
+LEAGUES = ["MLB", "WNBA", "NCAAF", "NBA", "NFL"]
+
+for league in LEAGUES:
     if league == "MLB":
         totalPicks = 500
+        sidesOrderPickBy = "StraightUp"
+        totalsOrderPickBy = "Totals"
     else:
-        totalPicks = 250
+        totalPicks = 100
+        sidesOrderPickBy = "Ats"
+        totalsOrderPickBy = "Totals"
 
-    sides_data = get_money_leaders_picks(league, totalPicks=totalPicks, orderPickBy="StraightUp")
-    totals_data = get_money_leaders_picks(league, totalPicks=totalPicks, orderPickBy="Totals")
+    sides_data = get_money_leaders_picks(league, totalPicks=totalPicks, orderPickBy=sidesOrderPickBy)
+    totals_data = get_money_leaders_picks(league, totalPicks=totalPicks, orderPickBy=totalsOrderPickBy)
 
     n_added = 0
 

@@ -85,9 +85,9 @@ def get_money_leaders_picks(league, **kwargs):
     url = f"/consensus/pickleaders/{league.lower()}?"
 
     query = urlencode({
-        "totalPicks": kwargs.get("totalPicks", "500"),
-        "orderBy": kwargs.get("orderBy", "Units"),
         "orderPickBy": kwargs.get("orderPickBy"),
+        "orderBy": kwargs.get("orderBy", "Units"),
+        "totalPicks": kwargs.get("totalPicks", "500"),
     })
     altTextToSearch = f"{league.lower()} Pending Picks"
 
